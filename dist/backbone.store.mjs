@@ -20,7 +20,7 @@ _.extend(ModelCache.prototype, {
     };
 
     // Extend Model's static properties onto new
-    _.extend(modelConstructor, Model, Backbone.Events);
+    _.extend(modelConstructor, Model);
 
     // Backbone collections need prototype of wrapped class
     modelConstructor.prototype = this.Model.prototype;
@@ -29,16 +29,16 @@ _.extend(ModelCache.prototype, {
   },
 
 
-  // Override for different casting options
-  getId: function getId(id) {
-    // Return a string id
-    return id && String(id);
+  // Override to provide a different instance index
+  // ie: return id && String(id);
+  getIndex: function getIndex(id) {
+    return id;
   },
   get: function get(attrs, options) {
-    var id = this.getId(attrs && attrs[this.Model.prototype.idAttribute]);
+    var index = this.getIndex(attrs && attrs[this.Model.prototype.idAttribute]);
 
     // Attempt to restore a locally cached instance
-    var instance = this.instances[id];
+    var instance = this.instances[index];
 
     if (!instance) {
       // If we haven't seen this instance before, start caching it
@@ -47,6 +47,8 @@ _.extend(ModelCache.prototype, {
 
     // Otherwise update the attributes of the cached instance
     instance.set(attrs, options);
+
+    Store.trigger('update', instance, this);
 
     return instance;
   },
@@ -65,19 +67,21 @@ _.extend(ModelCache.prototype, {
     return instance;
   },
   add: function add(instance) {
-    var id = this.getId(instance.id);
+    var index = this.getIndex(instance.id);
 
     // If the instance is not already stored, store it
-    if (!this.instances[id]) this.instances[id] = instance;
+    if (!this.instances[index]) this.instances[index] = instance;
+
+    Store.trigger('add', instance, this);
 
     return instance;
   },
   remove: function remove(instance) {
-    var id = this.getId(instance.id);
+    var index = this.getIndex(instance.id);
 
-    // Stop tracking this model; otherwise mem leak (there are other
-    // sources of memory leaks we need to address, but hey, here's one)
-    if (this.instances[id]) delete this.instances[id];
+    if (this.instances[index]) delete this.instances[index];
+
+    Store.trigger('remove', instance, this);
 
     return instance;
   }
@@ -94,13 +98,14 @@ var Models = {};
 function Store(Model) {
   var modelName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _.uniqueId('Store_');
 
-  var ModelCache$$1 = Store.add(Model, modelName);
+  var cache = Store.add(Model, modelName);
 
-  return ModelCache$$1.modelConstructor;
+  return cache.modelConstructor;
 }
 
 // Static functions
-_.extend(Store, {
+_.extend(Store, Backbone.Events, {
+
   ModelCache: ModelCache,
 
   get: function get(modelName) {
@@ -118,9 +123,12 @@ _.extend(Store, {
   remove: function remove(modelName) {
     delete Models[modelName];
   },
-  clear: function clear() {
+  getAll: function getAll() {
+    return _.clone(Models);
+  },
+  removeAll: function removeAll() {
     for (var modelName in Models) {
-      this.remove(modelName);
+      Store.remove(modelName);
     }
   }
 });

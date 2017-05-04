@@ -1,6 +1,6 @@
 {
   "name": "backbone.store",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Store for keeping unique instance of Backbone models with ease.",
   "main": "dist/backbone.store.js",
   "module": "dist/backbone.store.mjs",
@@ -11,7 +11,7 @@
     "watch": "rollup -c -w",
     "pretest": "rollup -c",
     "test": "mocha",
-    "prepublish": "npm test"
+    "prepublish": "npm build"
   },
   "repository": "RoundingWellOS/backbone.store",
   "keywords": [
@@ -39,12 +39,15 @@
     "babel-preset-es2015": "^6.18.0",
     "babel-register": "^6.18.0",
     "babelrc-rollup": "^3.0.0",
+    "chai": "^3.5.0",
     "eslint": "^3.12.2",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "rollup": "^0.37.0",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-istanbul": "^1.1.0",
-    "rollup-watch": "^2.5.0"
+    "rollup-watch": "^2.5.0",
+    "sinon": "^2.2.0",
+    "sinon-chai": "^2.10.0"
   }
 }
