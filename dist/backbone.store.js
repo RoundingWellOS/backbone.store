@@ -14,41 +14,34 @@ function ModelCache(Model, modelName) {
   this.instances = {};
   this.Model = Model;
   this.modelName = modelName;
-  this.modelConstructor = this._getConstructor(Model);
+  this.ModelConstructor = this._getConstructor(Model);
 }
 
 _.extend(ModelCache.prototype, {
   _getConstructor: function _getConstructor(Model) {
     var cache = this;
 
-    var modelConstructor = function modelConstructor(attrs, options) {
+    var ModelConstructor = function ModelConstructor(attrs, options) {
       return cache.get(attrs, options);
     };
 
     // Extend Model's static properties onto new
-    _.extend(modelConstructor, Model);
+    _.extend(ModelConstructor, Model);
 
     // Backbone collections need prototype of wrapped class
-    modelConstructor.prototype = this.Model.prototype;
+    ModelConstructor.prototype = this.Model.prototype;
 
-    return modelConstructor;
-  },
-
-
-  // Override to provide a different instance index
-  // ie: return id && String(id);
-  getIndex: function getIndex(id) {
-    return id;
+    return ModelConstructor;
   },
   get: function get(attrs, options) {
-    var index = this.getIndex(attrs && attrs[this.Model.prototype.idAttribute]);
+    var instanceId = attrs && attrs[this.Model.prototype.idAttribute];
 
     // Attempt to restore a locally cached instance
-    var instance = this.instances[index];
+    var instance = this.instances[instanceId];
 
     if (!instance) {
       // If we haven't seen this instance before, start caching it
-      return this.new(attrs, options);
+      return this._new(attrs, options);
     }
 
     // Otherwise update the attributes of the cached instance
@@ -58,34 +51,30 @@ _.extend(ModelCache.prototype, {
 
     return instance;
   },
-  new: function _new(attrs, options) {
+  _new: function _new(attrs, options) {
     var instance = new this.Model(attrs, options);
 
     if (instance.isNew()) {
       // Store the instance if we get an id after instantation
-      instance.once('change:' + instance.idAttribute, this.add, this);
+      instance.once('change:' + instance.idAttribute, this._add, this);
     } else {
-      this.add(instance);
+      this._add(instance);
     }
 
     instance.on('destroy', this.remove, this);
 
     return instance;
   },
-  add: function add(instance) {
-    var index = this.getIndex(instance.id);
+  _add: function _add(instance) {
+    // If the id is already stored do not add it.
+    if (this.instances[instance.id]) return;
 
-    // If the instance is not already stored, store it
-    if (!this.instances[index]) this.instances[index] = instance;
+    this.instances[instance.id] = instance;
 
     Store.trigger('add', instance, this);
-
-    return instance;
   },
   remove: function remove(instance) {
-    var index = this.getIndex(instance.id);
-
-    if (this.instances[index]) delete this.instances[index];
+    if (this.instances[instance.id]) delete this.instances[instance.id];
 
     Store.trigger('remove', instance, this);
 
@@ -93,20 +82,20 @@ _.extend(ModelCache.prototype, {
   }
 });
 
-var Models = {};
+var ModelCaches = {};
 
 /**
  * Store wrapper converts regular Backbone models into unique ones.
  *
  * Example:
- *   const UniqueUser = Store(User);
+ *   const StoredUser = Store(User);
  */
 function Store(Model) {
   var modelName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _.uniqueId('Store_');
 
   var cache = Store.add(Model, modelName);
 
-  return cache.modelConstructor;
+  return cache.ModelConstructor;
 }
 
 // Static functions
@@ -114,26 +103,35 @@ _.extend(Store, Backbone.Events, {
 
   ModelCache: ModelCache,
 
-  get: function get(modelName) {
-    if (!Models[modelName]) throw 'Unrecognized Model: ' + modelName;
-
-    return Models[modelName];
-  },
   add: function add(Model, modelName) {
     if (!modelName) throw 'Model name required!';
 
-    if (Models[modelName]) return Models[modelName];
+    if (ModelCaches[modelName]) return ModelCaches[modelName];
 
-    return Models[modelName] = new Store.ModelCache(Model, modelName);
+    return ModelCaches[modelName] = new Store.ModelCache(Model, modelName);
   },
-  remove: function remove(modelName) {
-    delete Models[modelName];
+  getCache: function getCache(modelName) {
+    if (!ModelCaches[modelName]) throw 'Unrecognized Model: ' + modelName;
+
+    return ModelCaches[modelName];
+  },
+  getAllCache: function getAllCache() {
+    return _.clone(ModelCaches);
+  },
+  get: function get(modelName) {
+    return this.getCache(modelName).ModelConstructor;
   },
   getAll: function getAll() {
-    return _.clone(Models);
+    return _.reduce(ModelCaches, function (all, cache, modelName) {
+      all[modelName] = cache.ModelConstructor;
+      return all;
+    }, {});
+  },
+  remove: function remove(modelName) {
+    delete ModelCaches[modelName];
   },
   removeAll: function removeAll() {
-    for (var modelName in Models) {
+    for (var modelName in ModelCaches) {
       Store.remove(modelName);
     }
   }

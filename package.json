@@ -1,6 +1,6 @@
 {
   "name": "backbone.store",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Store for keeping unique instance of Backbone models with ease.",
   "main": "dist/backbone.store.js",
   "module": "dist/backbone.store.mjs",
