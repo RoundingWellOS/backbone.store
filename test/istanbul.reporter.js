@@ -8,7 +8,7 @@ module.exports = function (runner) {
   new MochaSpecReporter(runner);
 
   runner.on('end', function () {
-    collector.add(global.__coverage__);
+    collector.add(global.__coverage__ || {});
 
     reporter.write(collector, true, function () {
       process.stdout.write('report generated');
