@@ -68,7 +68,9 @@ _.extend(ModelCache.prototype, {
     Store.trigger('add', instance, this);
   },
   remove: function remove(instance) {
-    if (this.instances[instance.id]) delete this.instances[instance.id];
+    if (!this.instances[instance.id]) return instance;
+
+    delete this.instances[instance.id];
 
     Store.trigger('remove', instance, this);
 
@@ -98,14 +100,14 @@ _.extend(Store, Backbone.Events, {
   ModelCache: ModelCache,
 
   add: function add(Model, modelName) {
-    if (!modelName) throw 'Model name required!';
+    if (!modelName) throw 'Model name required';
 
     if (ModelCaches[modelName]) return ModelCaches[modelName];
 
     return ModelCaches[modelName] = new Store.ModelCache(Model, modelName);
   },
   getCache: function getCache(modelName) {
-    if (!ModelCaches[modelName]) throw 'Unrecognized Model: ' + modelName;
+    if (!ModelCaches[modelName]) throw 'Unrecognized Model: "' + modelName + '"';
 
     return ModelCaches[modelName];
   },
@@ -113,7 +115,7 @@ _.extend(Store, Backbone.Events, {
     return _.clone(ModelCaches);
   },
   get: function get(modelName) {
-    return this.getCache(modelName).ModelConstructor;
+    return Store.getCache(modelName).ModelConstructor;
   },
   getAll: function getAll() {
     return _.reduce(ModelCaches, function (all, cache, modelName) {
@@ -125,9 +127,7 @@ _.extend(Store, Backbone.Events, {
     delete ModelCaches[modelName];
   },
   removeAll: function removeAll() {
-    for (var modelName in ModelCaches) {
-      Store.remove(modelName);
-    }
+    ModelCaches = {};
   }
 });
 
