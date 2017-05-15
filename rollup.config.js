@@ -3,7 +3,7 @@ import babelrc from 'babelrc-rollup';
 import istanbul from 'rollup-plugin-istanbul';
 
 const pkg = require('./package.json');
-const external = Object.keys(pkg.dependencies);
+const external = Object.keys(pkg.peerDependencies);
 
 const plugins = [
   babel(babelrc()),
