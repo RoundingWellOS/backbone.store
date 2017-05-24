@@ -39,7 +39,7 @@ _.extend(ModelCache.prototype, {
     }
 
     // Otherwise update the attributes of the cached instance
-    instance.set(attrs, options);
+    instance.set(attrs);
 
     Store.trigger('update', instance, this);
 
