@@ -169,12 +169,12 @@ describe('ModelCache', () => {
         cachedInstance = new modelCache.ModelConstructor({ _id: 1 });
       });
 
-      it('should set the attrs and pass the options', () => {
+      it('should set the attrs and not pass the options', () => {
         sinon.spy(cachedInstance, 'set');
         const attrs = { _id: 1, foo: 'bar' };
         const options = { merge: true };
         modelCache.get(attrs, options);
-        expect(cachedInstance.set).to.have.been.calledOnce.and.calledWith(attrs, options);
+        expect(cachedInstance.set).to.have.been.calledOnce.and.calledWithExactly(attrs);
       });
 
       it('should trigger the "update" event on Store', () => {
