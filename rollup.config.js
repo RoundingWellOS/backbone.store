@@ -1,39 +1,35 @@
-import babel from 'rollup-plugin-babel';
-import babelrc from 'babelrc-rollup';
-import istanbul from 'rollup-plugin-istanbul';
+import babel from '@rollup/plugin-babel';
+import { eslint } from 'rollup-plugin-eslint';
+
+const globals = {
+  'backbone': 'Backbone',
+  'underscore': '_',
+};
 
 const pkg = require('./package.json');
 const external = Object.keys(pkg.peerDependencies);
 
-const plugins = [
-  babel(babelrc()),
-];
-
-if (process.env.BUILD !== 'production') {
-  plugins.push(istanbul({
-    exclude: ['test/**/*', 'node_modules/**/*']
-  }));
-}
-
-export default {
-  entry: 'lib/index.js',
-  plugins: plugins,
-  globals: {
-    backbone: 'Backbone',
-    underscore: '_'
+export default [
+  {
+    input: 'lib/index.js',
+    external,
+    output: [
+      {
+        file: pkg.main,
+        format: 'umd',
+        name: 'Store',
+        exports: 'named',
+        sourcemap: true,
+        globals
+      },
+      {
+        file: pkg.module,
+        format: 'es'
+      }
+    ],
+    plugins: [
+      eslint(),
+      babel()
+    ]
   },
-  external: external,
-  targets: [
-    {
-      dest: pkg.main,
-      format: 'umd',
-      moduleName: 'Store',
-      sourceMap: true
-    },
-    {
-      dest: pkg.module,
-      format: 'es',
-      sourceMap: true
-    }
-  ]
-};
+];

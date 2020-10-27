@@ -176,4 +176,4 @@ Backbone.Store is heavily inspired by [Backbone.UniqueModel](https://github.com/
 
 ===
 
-This library is © 2017 RoundingWell. Distributed under MIT license.
+This library is © 2020 RoundingWell. Distributed under MIT license.

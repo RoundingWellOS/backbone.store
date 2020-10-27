@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import Backbone from 'backbone';
-import { expect, sandbox } from './setup';
+import sinonCreate from 'sinon';
+import { expect } from './setup';
 
 import Store from '../dist/backbone.store';
 
@@ -10,7 +11,7 @@ describe('Backbone.Store', () => {
   const Model2 = Backbone.Model.extend();
 
   beforeEach(() => {
-    sinon = sandbox.create();
+    sinon = sinonCreate.createSandbox();
   });
 
   afterEach(() => {
