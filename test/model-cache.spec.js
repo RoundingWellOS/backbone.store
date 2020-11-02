@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
-import { expect, sandbox } from './setup';
+import sinonCreate from 'sinon';
+import { expect } from './setup';
 
 import Store, { ModelCache } from '../dist/backbone.store';
 
@@ -7,7 +8,7 @@ describe('ModelCache', () => {
   let sinon;
 
   beforeEach(() => {
-    sinon = sandbox.create();
+    sinon = sinonCreate.createSandbox();
   });
 
   afterEach(() => {
