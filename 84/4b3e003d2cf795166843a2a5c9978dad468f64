@@ -1,0 +1,49 @@
+dist/backbone.store.mjs
+  ca6cf67c3bb71070 1-6,8-12,15-129,131-133,140-146,149-177,179-203,207-208,210
+  s_ca6cf67c3bb710::t_488f415e0576de 134-135,178,205
+  s_ca6cf67c3bb710::t_ec0ec4c3440b93 136-138
+dist/backbone.store.cjs
+  s_ca6cf67c3bb710::t_488f415e0576de 162-163,206,233
+  s_ca6cf67c3bb710::t_43c2a4c84918fe 28,30
+  s_ca6cf67c3bb710::t_ec0ec4c3440b93 164-166
+  ca6cf67c3bb71070 1-27,29,31-161,167-205,207-232,234-239
+dist/index.d.ts
+  s_ca6cf67c3bb710::t_b80cfcb6319414 1-82
+package.json
+  s_ca6cf67c3bb710::t_b80cfcb6319414 3
+dist/backbone.store.js
+  s_ca6cf67c3bb710::t_ec0ec4c3440b93 169-171
+  ca6cf67c3bb71070 1-5,7-33,36-166,172-210,212-237,239-245
+  s_ca6cf67c3bb710::t_488f415e0576de 167-168,211,238
+  s_ca6cf67c3bb710::t_43c2a4c84918fe 34-35
+  s_ca6cf67c3bb710::t_3ded66963d3651 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "844b3e003d2cf795166843a2a5c9978dad468f64",
+  "prompts": {
+    "ca6cf67c3bb71070": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df97f-1c46-71c0-9a19-9e0e1a6f6f8f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>",
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 658,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_ca6cf67c3bb710": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df97f-1c46-71c0-9a19-9e0e1a6f6f8f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
