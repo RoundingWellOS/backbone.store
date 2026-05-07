@@ -2,30 +2,38 @@
   "name": "backbone.store",
   "version": "1.1.1",
   "description": "Store for keeping unique instance of Backbone models with ease.",
-  "main": "dist/backbone.store.js",
-  "module": "dist/backbone.store.esm.js",
-  "jsnext:main": "dist/backbone.store.esm.js",
+  "type": "module",
+  "main": "dist/backbone.store.cjs",
+  "module": "dist/backbone.store.mjs",
+  "jsnext:main": "dist/backbone.store.mjs",
+  "types": "dist/index.d.ts",
+  "unpkg": "dist/backbone.store.js",
+  "jsdelivr": "dist/backbone.store.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/backbone.store.mjs",
+      "require": "./dist/backbone.store.cjs",
+      "default": "./dist/backbone.store.mjs"
+    },
+    "./package.json": "./package.json"
+  },
   "sideEffects": false,
   "browserslist": [
     ">0.5%",
     "Explorer >= 10",
     "not op_mini all"
   ],
-  "nyc": {
-    "require": [
-      "@babel/register"
-    ],
-    "sourceMap": false,
-    "instrument": false
-  },
   "scripts": {
-    "prebuild": "eslint lib test",
-    "build": "rollup -c",
-    "coverage": "cross-env NODE_ENV=test nyc mocha --config ./test/.mocharc.json && nyc report --reporter=html",
-    "lint": "eslint --fix lib/ && eslint --fix test/",
-    "watch": "rollup -c -w",
-    "pretest": "rollup -c",
-    "test": "mocha -w --config ./test/.mocharc.json"
+    "build": "tsdown --config-loader native",
+    "check": "npm run lint && npm run test && npm run build && npm run smoke",
+    "coverage": "cross-env NODE_ENV=test c8 --include 'lib/**/*.js' --reporter=text --reporter=html mocha --config ./test/.mocharc.json",
+    "lint": "eslint lib test",
+    "lint:fix": "eslint --fix lib test",
+    "smoke": "node test/smoke/esm.mjs && node test/smoke/cjs.cjs && node test/smoke/umd.cjs && node test/smoke/amd.cjs && tsc --noEmit -p test/smoke/tsconfig.json",
+    "test": "mocha --config ./test/.mocharc.json",
+    "test:watch": "mocha -w --config ./test/.mocharc.json",
+    "watch": "tsdown --config-loader native --watch"
   },
   "repository": "RoundingWellOS/backbone.store",
   "keywords": [
@@ -48,21 +56,20 @@
     "underscore": "^1.9.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1",
-    "@babel/register": "^7.12.1",
-    "@rollup/plugin-babel": "^5.2.1",
-    "babel-plugin-istanbul": "^6.0.0",
-    "backbone": "^1.4.0",
-    "chai": "^4.2.0",
-    "cross-env": "^7.0.2",
-    "eslint": "^7.12.0",
-    "mocha": "^8.2.0",
-    "nyc": "^15.1.0",
-    "rollup": "^2.32.1",
-    "rollup-plugin-eslint": "^7.0.0",
-    "sinon": "^9.2.0",
-    "sinon-chai": "^3.5.0",
-    "underscore": "^1.11.0"
+    "@eslint/js": "^10.0.1",
+    "@types/backbone": "^1.4.23",
+    "@types/underscore": "^1.13.0",
+    "backbone": "^1.6.1",
+    "c8": "^11.0.0",
+    "chai": "^6.2.2",
+    "cross-env": "^10.1.0",
+    "eslint": "^10.3.0",
+    "globals": "^17.6.0",
+    "mocha": "^11.7.5",
+    "sinon": "^22.0.0",
+    "sinon-chai": "^4.0.1",
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.3",
+    "underscore": "^1.13.8"
   }
 }
