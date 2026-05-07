@@ -88,6 +88,7 @@ This triggers the Store `remove` event for the evicted model.
 Returns `{ modelName, id, key, cached, model }`.
 `id` is the caller-supplied id, `key` is the normalized cache key, and `model` is the live Backbone model reference or `undefined`.
 For `null` and `undefined` ids, `key` is `undefined`, `cached` is `false`, and `model` is `undefined`.
+When called by object-formatting tools as `.inspect(depth, options)`, returns a short Store label instead of treating `depth` as a model name.
 
 #### `Store.getAll()`
 Returns all Model definitions by name.

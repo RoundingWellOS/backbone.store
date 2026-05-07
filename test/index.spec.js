@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import Backbone from 'backbone';
 import sinonCreate from 'sinon';
+import { inspect as utilInspect } from 'node:util';
 import { expect } from './setup.js';
 
 import Store from '../lib/index.js';
@@ -286,6 +287,27 @@ describe('Backbone.Store', () => {
 
     it('should throw when a modelName is not recognized', () => {
       expect(_.partial(Store.inspect, 'bar', 1)).to.throw('Unrecognized Model: "bar"');
+    });
+
+    it('should not throw when object formatters call inspect with depth', () => {
+      expect(Store.inspect(1)).to.equal('[Backbone.Store]');
+      expect(Store.inspect(0)).to.equal('[Backbone.Store]');
+      expect(Store.inspect(1, {})).to.equal('[Backbone.Store]');
+      expect(Store.inspect(2, null)).to.equal('[Backbone.Store]');
+    });
+
+    it('should expose a custom Node inspect label', () => {
+      expect(utilInspect(Store)).to.equal('[Backbone.Store]');
+    });
+
+    it('should preserve normal inspect behavior for non-numeric modelNames', () => {
+      expect(Store.inspect('foo', 1)).to.eql({
+        modelName: 'foo',
+        id: 1,
+        key: '1',
+        cached: true,
+        model: instance
+      });
     });
   });
 
