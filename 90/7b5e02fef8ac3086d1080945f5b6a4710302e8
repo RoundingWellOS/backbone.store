@@ -1,0 +1,31 @@
+dist/backbone.store.mjs
+  s_ca6cf67c3bb710::t_ec0ec4c3440b93 134-136,176
+dist/backbone.store.cjs
+  s_ca6cf67c3bb710::t_ec0ec4c3440b93 162-164,204
+test/index.spec.js
+  s_ca6cf67c3bb710::t_5409ae67b72e46 290-294
+README.md
+  s_ca6cf67c3bb710::t_b273900fa46369 91
+lib/index.js
+  s_ca6cf67c3bb710::t_fb23dbf7e0698c 8-11,68-70
+CHANGELOG.md
+  s_ca6cf67c3bb710::t_bc34fefd2dc443 19
+dist/backbone.store.js
+  s_ca6cf67c3bb710::t_ec0ec4c3440b93 167-169,209
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "907b5e02fef8ac3086d1080945f5b6a4710302e8",
+  "prompts": {},
+  "sessions": {
+    "s_ca6cf67c3bb710": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df97f-1c46-71c0-9a19-9e0e1a6f6f8f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
