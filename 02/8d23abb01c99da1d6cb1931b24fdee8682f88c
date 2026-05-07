@@ -1,0 +1,19 @@
+package.json
+  s_ca6cf67c3bb710::t_e61c4a64c5de9e 5-20,28-36,59-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "028d23abb01c99da1d6cb1931b24fdee8682f88c",
+  "prompts": {},
+  "sessions": {
+    "s_ca6cf67c3bb710": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df97f-1c46-71c0-9a19-9e0e1a6f6f8f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
