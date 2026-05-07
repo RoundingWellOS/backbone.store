@@ -1,0 +1,76 @@
+test/smoke/umd.cjs
+  s_ca6cf67c3bb710::t_f6cd561506dd9f 25-28
+dist/backbone.store.mjs
+  ca6cf67c3bb71070 1-6,8-12,15-129,131-133,135-141,144-197,200-201,203
+eslint.config.js
+  s_ca6cf67c3bb710::t_06d838338aa172 1-6,8-12,14-15,27-38
+  s_ca6cf67c3bb710::t_e11d97630d7eb2 13
+  s_ca6cf67c3bb710::t_9e8fdab6f7df64 7
+  s_ca6cf67c3bb710::t_eaf31cddb1d01c 16-26
+package.json
+  s_ca6cf67c3bb710::t_4816a7ac86e20e 63
+  s_ca6cf67c3bb710::t_38cf16b8ec58a3 5
+  ca6cf67c3bb71070 3,6-20,29,31-32,34-35,60-61,72
+  s_ca6cf67c3bb710::t_934b0487478d90 59,67
+  s_ca6cf67c3bb710::t_6d61a7828eccc2 33
+  s_ca6cf67c3bb710::t_79dadbd4ce9460 28,36
+  s_ca6cf67c3bb710::t_3b3e4d62bcbd9e 30
+  s_ca6cf67c3bb710::t_48030f9ead5575 62,64-66,68-71,73
+dist/index.d.ts
+  s_ca6cf67c3bb710::t_800922d1d4409c 1-2
+  ca6cf67c3bb71070 3-22,24-82
+  s_ca6cf67c3bb710::t_2b7e20e6f12822 23
+tsdown.config.mjs
+  s_ca6cf67c3bb710::t_f6eb19739ecc6e 14-52
+  s_ca6cf67c3bb710::t_5b90acfe233844 3
+test/smoke/amd.cjs
+  s_ca6cf67c3bb710::t_f53b4d089d46d1 1-46
+.travis.yml
+  s_ca6cf67c3bb710::t_d45158a78287b6 3-5
+test/smoke/cjs.cjs
+  s_ca6cf67c3bb710::t_281b3e28f17ff5 3-12
+dist/backbone.store.js
+  ca6cf67c3bb71070 1-5,7-33,36-238
+  s_ca6cf67c3bb710::t_3ded66963d3651 6
+  s_ca6cf67c3bb710::t_43c2a4c84918fe 34-35
+dist/backbone.store.cjs
+  ca6cf67c3bb71070 1-27,29,31-232
+  s_ca6cf67c3bb710::t_43c2a4c84918fe 28,30
+index.d.ts
+  s_ca6cf67c3bb710::t_37f90d4b220c31 23
+  s_ca6cf67c3bb710::t_6be988686a5a6e 1-2
+CHANGELOG.md
+  s_ca6cf67c3bb710::t_ab973008a7c558 1-5,7-12
+  s_ca6cf67c3bb710::t_e4b3c4638317c5 6,13-18
+test/setup.js
+  s_ca6cf67c3bb710::t_ebd1085db2628c 1,8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "981c3f451209c011febc93bd6338ed04557114f9",
+  "prompts": {
+    "ca6cf67c3bb71070": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df97f-1c46-71c0-9a19-9e0e1a6f6f8f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>",
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 761,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_ca6cf67c3bb710": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df97f-1c46-71c0-9a19-9e0e1a6f6f8f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
