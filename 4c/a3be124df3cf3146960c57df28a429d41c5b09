@@ -1,0 +1,53 @@
+test/index.spec.js
+  s_ca6cf67c3bb710::t_fe90af27a6531a 324-327
+  s_ca6cf67c3bb710::t_a9639210b56f12 4,6
+lib/model-cache.js
+  s_ca6cf67c3bb710::t_02785a002d6577 3
+  s_ca6cf67c3bb710::t_358c749eaf3d31 199
+test/model-cache.spec.js
+  s_ca6cf67c3bb710::t_cec332f479ff4e 3,5
+  s_ca6cf67c3bb710::t_2f162d4f603145 120-144
+lib/index.js
+  s_ca6cf67c3bb710::t_be7a37c4f753fd 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "4ca3be124df3cf3146960c57df28a429d41c5b09",
+  "prompts": {
+    "ca6cf67c3bb71070": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df97f-1c46-71c0-9a19-9e0e1a6f6f8f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>",
+      "total_additions": 1741,
+      "total_deletions": 916,
+      "accepted_lines": 761,
+      "overriden_lines": 0
+    },
+    "f203ba374a754fe8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "956fef6f-ee8b-4b55-90ae-bc161c4b53bf",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>",
+      "total_additions": 7,
+      "total_deletions": 0,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_ca6cf67c3bb710": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df97f-1c46-71c0-9a19-9e0e1a6f6f8f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
