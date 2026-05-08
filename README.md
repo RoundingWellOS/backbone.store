@@ -65,14 +65,49 @@ Returns all `ModelCache` instances by name.
 #### `Store.get(modelName)`
 Returns a Model definition by name.
 
+#### `Store.find(modelName, id)`
+Returns a cached model instance by id, or `undefined` if the model is not cached.
+The id is normalized with `String(id)`, so `1` and `"1"` resolve to the same cached model.
+`null` and `undefined` ids return `undefined`.
+
+#### `Store.has(modelName, id)`
+Returns `true` when a model instance is cached by id.
+`null` and `undefined` ids return `false`.
+
+#### `Store.patch(modelName, id, attrs, [options])`
+Updates an existing cached model with `model.set(attrs, options)`.
+Returns the patched model, or `undefined` when the id is not cached.
+This is the option-aware update API; duplicate construction still preserves the original behavior and calls `set(attrs)` without options.
+
+#### `Store.evict(modelName, id)`
+Removes one cached model without destroying it.
+Returns the evicted model, or `undefined` when the id is not cached.
+This triggers the Store `remove` event for the evicted model.
+
+#### `Store.inspect(modelName, id)`
+Returns `{ modelName, id, key, cached, model }`.
+`id` is the caller-supplied id, `key` is the normalized cache key, and `model` is the live Backbone model reference or `undefined`.
+For `null` and `undefined` ids, `key` is `undefined`, `cached` is `false`, and `model` is `undefined`.
+When called by object-formatting tools as `.inspect(depth, options)`, returns a short Store label instead of treating `depth` as a model name.
+
 #### `Store.getAll()`
 Returns all Model definitions by name.
 
+#### `Store.reset(modelName)`
+Clears all cached and pending models for one `modelName` while keeping the registered Model definition.
+This detaches Store-owned listeners and does not trigger `remove` or `reset` events.
+
+#### `Store.resetAll()`
+Clears all cached and pending models for every registered Model definition.
+This keeps the registered Model definitions and does not trigger `remove` or `reset` events.
+
 #### `Store.remove(modelName)`
 Removes a `ModelCache` from `Store` by name.
+This detaches Store-owned listeners and does not trigger `remove` or `reset` events.
 
 #### `Store.removeAll()`
 Removes the entire cache.
+This detaches Store-owned listeners and does not trigger `remove` or `reset` events.
 
 #### `Store` examples
 ```javscript
@@ -92,6 +127,9 @@ const Models = Store.getAll();
 
 console.log(StoredModel === Models.myModel.modelConstructor);
 ```
+
+All APIs that take `modelName` throw the same error as `Store.getCache(modelName)` when the model name is not recognized.
+Calling `StoredModel.extend(...)` still delegates to Backbone's inherited `extend`; the returned child constructor is not automatically registered with Store unless it is passed through `Store(childModel, modelName)`.
 
 ### Store Events
 
@@ -165,10 +203,14 @@ Instances will have four properties:
 #### `get(attrs, options)`
 If the instance by index is not cached it is instantiated, cached, and returned.
 Otherwise it returns the cached instance and sets the `attrs` on the model.
-The `options` passed to this method will pass through to the `new` or the `set`.
+The `options` passed to this method will pass through only when a new model is instantiated.
+Use `patch(id, attrs, options)` when cached updates need `set` options.
 
 #### `remove(instance)`
 Removes the model instance from the cache.
+
+#### `find(id)`, `has(id)`, `patch(id, attrs, [options])`, `evict(id)`, `inspect(id)`, `reset()`
+ModelCache-level primitives backing the Store APIs of the same names.
 
 ## Acknowledgments
 

@@ -1,9 +1,10 @@
 import _ from 'underscore';
 import Backbone from 'backbone';
 import sinonCreate from 'sinon';
-import { expect } from './setup';
+import { inspect as utilInspect } from 'node:util';
+import { expect } from './setup.js';
 
-import Store from '../dist/backbone.store';
+import Store from '../lib/index.js';
 
 describe('Backbone.Store', () => {
   let sinon;
@@ -16,6 +17,7 @@ describe('Backbone.Store', () => {
 
   afterEach(() => {
     sinon.restore();
+    Store.off();
     Store.removeAll();
   });
 
@@ -133,6 +135,182 @@ describe('Backbone.Store', () => {
     });
   });
 
+  describe('find', () => {
+    let instance;
+
+    beforeEach(() => {
+      const StoredModel = Store(Model1, 'foo');
+      instance = new StoredModel({ id: 1 });
+    });
+
+    it('should return a cached model by name and id', () => {
+      expect(Store.find('foo', '1')).to.equal(instance);
+    });
+
+    it('should return undefined for a missing model', () => {
+      expect(Store.find('foo', 2)).to.be.undefined;
+    });
+
+    it('should return undefined for a nullish id', () => {
+      expect(Store.find('foo')).to.be.undefined;
+      expect(Store.find('foo', null)).to.be.undefined;
+    });
+
+    it('should throw when a modelName is not recognized', () => {
+      expect(_.partial(Store.find, 'bar', 1)).to.throw('Unrecognized Model: "bar"');
+    });
+  });
+
+  describe('has', () => {
+    beforeEach(() => {
+      const StoredModel = Store(Model1, 'foo');
+      new StoredModel({ id: 1 });
+    });
+
+    it('should return true for a cached model', () => {
+      expect(Store.has('foo', '1')).to.be.true;
+    });
+
+    it('should return false for a missing model', () => {
+      expect(Store.has('foo', 2)).to.be.false;
+    });
+
+    it('should return false for a nullish id', () => {
+      expect(Store.has('foo')).to.be.false;
+      expect(Store.has('foo', null)).to.be.false;
+    });
+
+    it('should throw when a modelName is not recognized', () => {
+      expect(_.partial(Store.has, 'bar', 1)).to.throw('Unrecognized Model: "bar"');
+    });
+  });
+
+  describe('patch', () => {
+    let instance;
+
+    beforeEach(() => {
+      const StoredModel = Store(Model1, 'foo');
+      instance = new StoredModel({ id: 1 });
+    });
+
+    it('should patch a cached model by name and id', () => {
+      expect(Store.patch('foo', '1', { foo: 'bar' })).to.equal(instance);
+      expect(instance.get('foo')).to.equal('bar');
+    });
+
+    it('should pass options to set', () => {
+      sinon.spy(instance, 'set');
+      const attrs = { foo: 'bar' };
+      const options = { silent: true };
+
+      Store.patch('foo', 1, attrs, options);
+
+      expect(instance.set).to.have.been.calledOnce.and.calledWithExactly(attrs, options);
+    });
+
+    it('should return undefined for a missing model', () => {
+      expect(Store.patch('foo', 2, { foo: 'bar' })).to.be.undefined;
+    });
+
+    it('should return undefined for a nullish id', () => {
+      expect(Store.patch('foo', null, { foo: 'bar' })).to.be.undefined;
+    });
+
+    it('should throw when a modelName is not recognized', () => {
+      expect(_.partial(Store.patch, 'bar', 1, {})).to.throw('Unrecognized Model: "bar"');
+    });
+  });
+
+  describe('evict', () => {
+    let instance;
+
+    beforeEach(() => {
+      const StoredModel = Store(Model1, 'foo');
+      instance = new StoredModel({ id: 1 });
+    });
+
+    it('should remove and return a cached model by name and id', () => {
+      expect(Store.evict('foo', '1')).to.equal(instance);
+      expect(Store.find('foo', 1)).to.be.undefined;
+    });
+
+    it('should return undefined for a missing model', () => {
+      expect(Store.evict('foo', 2)).to.be.undefined;
+    });
+
+    it('should return undefined for a nullish id', () => {
+      expect(Store.evict('foo', null)).to.be.undefined;
+    });
+
+    it('should throw when a modelName is not recognized', () => {
+      expect(_.partial(Store.evict, 'bar', 1)).to.throw('Unrecognized Model: "bar"');
+    });
+  });
+
+  describe('inspect', () => {
+    let instance;
+
+    beforeEach(() => {
+      const StoredModel = Store(Model1, 'foo');
+      instance = new StoredModel({ id: 1 });
+    });
+
+    it('should describe a cached model by name and id', () => {
+      expect(Store.inspect('foo', 1)).to.eql({
+        modelName: 'foo',
+        id: 1,
+        key: '1',
+        cached: true,
+        model: instance
+      });
+    });
+
+    it('should describe a missing model', () => {
+      expect(Store.inspect('foo', 2)).to.eql({
+        modelName: 'foo',
+        id: 2,
+        key: '2',
+        cached: false,
+        model: undefined
+      });
+    });
+
+    it('should describe a nullish id', () => {
+      expect(Store.inspect('foo', null)).to.eql({
+        modelName: 'foo',
+        id: null,
+        key: undefined,
+        cached: false,
+        model: undefined
+      });
+    });
+
+    it('should throw when a modelName is not recognized', () => {
+      expect(_.partial(Store.inspect, 'bar', 1)).to.throw('Unrecognized Model: "bar"');
+    });
+
+    it('should not throw when object formatters call inspect with depth', () => {
+      expect(Store.inspect(1)).to.equal('[Backbone.Store]');
+      expect(Store.inspect(0)).to.equal('[Backbone.Store]');
+      expect(Store.inspect(1, {})).to.equal('[Backbone.Store]');
+      expect(Store.inspect(2, null)).to.equal('[Backbone.Store]');
+    });
+
+    it('should expose a custom Node inspect label', () => {
+      expect(utilInspect(Store)).to.equal('[Backbone.Store]');
+    });
+
+    it('should preserve normal inspect behavior for non-numeric modelNames', () => {
+      expect(Store.inspect('foo', 1)).to.eql({
+        modelName: 'foo',
+        id: 1,
+        key: '1',
+        cached: true,
+        model: instance
+      });
+    });
+  });
+
   describe('getAll', () => {
     it('should return an object of each model contructor', () => {
       Store(Model1, 'foo');
@@ -152,6 +330,76 @@ describe('Backbone.Store', () => {
       const cache = Store.getAllCache();
       expect(cache).to.not.contain.keys('foo');
       expect(cache).to.contain.keys('bar');
+    });
+
+    it('should detach listeners from cached instances', () => {
+      const onRemove = sinon.stub();
+      Store.on('remove', onRemove);
+      const StoredModel = Store(Model1, 'foo');
+      const instance = new StoredModel({ id: 1 });
+
+      Store.remove('foo');
+      instance.trigger('destroy', instance, instance.collection, {});
+
+      expect(onRemove).to.not.have.been.called;
+    });
+
+    it('should not throw when a modelName is not recognized', () => {
+      expect(Store.remove('bar')).to.be.undefined;
+    });
+  });
+
+  describe('reset', () => {
+    it('should clear a cache by name without removing the ModelCache', () => {
+      const StoredModel = Store(Model1, 'foo');
+      new StoredModel({ id: 1 });
+
+      Store.reset('foo');
+
+      expect(Store.find('foo', 1)).to.be.undefined;
+      expect(Store.get('foo')).to.equal(StoredModel);
+    });
+
+    it('should not trigger a "remove" event', () => {
+      const onRemove = sinon.stub();
+      Store.on('remove', onRemove);
+      const StoredModel = Store(Model1, 'foo');
+      new StoredModel({ id: 1 });
+
+      Store.reset('foo');
+
+      expect(onRemove).to.not.have.been.called;
+    });
+
+    it('should throw when a modelName is not recognized', () => {
+      expect(_.partial(Store.reset, 'bar')).to.throw('Unrecognized Model: "bar"');
+    });
+  });
+
+  describe('resetAll', () => {
+    it('should clear all caches without removing ModelCaches', () => {
+      const StoredModel1 = Store(Model1, 'foo');
+      const StoredModel2 = Store(Model2, 'bar');
+      new StoredModel1({ id: 1 });
+      new StoredModel2({ id: 2 });
+
+      Store.resetAll();
+
+      expect(Store.find('foo', 1)).to.be.undefined;
+      expect(Store.find('bar', 2)).to.be.undefined;
+      expect(Store.get('foo')).to.equal(StoredModel1);
+      expect(Store.get('bar')).to.equal(StoredModel2);
+    });
+
+    it('should not trigger a "remove" event', () => {
+      const onRemove = sinon.stub();
+      Store.on('remove', onRemove);
+      const StoredModel = Store(Model1, 'foo');
+      new StoredModel({ id: 1 });
+
+      Store.resetAll();
+
+      expect(onRemove).to.not.have.been.called;
     });
   });
 
