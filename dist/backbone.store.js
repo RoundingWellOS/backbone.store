@@ -1,134 +1,244 @@
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('underscore'), require('backbone')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'underscore', 'backbone'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Store = {}, global._, global.Backbone));
-}(this, (function (exports, _, Backbone) { 'use strict';
+(function(global, factory) {
+	typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("underscore"), require("backbone")) : typeof define === "function" && define.amd ? define([
+		"exports",
+		"underscore",
+		"backbone"
+	], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory((global.Backbone = global.Backbone || {}, global.Backbone.Store = global.Backbone.Store || {}), global._, global.Backbone));
+})(this, function(exports, underscore, backbone) {
+	Object.defineProperties(exports, {
+		__esModule: { value: true },
+		[Symbol.toStringTag]: { value: "Module" }
+	});
+	//#region \0rolldown/runtime.js
+	var __create = Object.create;
+	var __defProp = Object.defineProperty;
+	var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+	var __getOwnPropNames = Object.getOwnPropertyNames;
+	var __getProtoOf = Object.getPrototypeOf;
+	var __hasOwnProp = Object.prototype.hasOwnProperty;
+	var __copyProps = (to, from, except, desc) => {
+		if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
+			key = keys[i];
+			if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
+				get: ((k) => from[k]).bind(null, key),
+				enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+			});
+		}
+		return to;
+	};
+	var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
+		value: mod,
+		enumerable: true
+	}) : target, mod));
+	//#endregion
+	backbone = __toESM(backbone, 1);
+	//#region lib/model-cache.js
+	function createCache() {
+		return Object.create(null);
+	}
+	function ModelCache(Model, modelName) {
+		this.instances = createCache();
+		this.pending = [];
+		this.Model = Model;
+		this.modelName = modelName;
+		this.ModelConstructor = this._getConstructor(Model);
+	}
+	(0, underscore.extend)(ModelCache.prototype, {
+		_getConstructor(Model) {
+			const cache = this;
+			const ModelConstructor = function(attrs, options) {
+				return cache.get(attrs, options);
+			};
+			(0, underscore.extend)(ModelConstructor, Model);
+			ModelConstructor.prototype = this.Model.prototype;
+			return ModelConstructor;
+		},
+		get(attrs, options) {
+			const instanceKey = this._getKey(attrs);
+			const instance = this.find(instanceKey);
+			if (!instance) return this._new(attrs, options);
+			instance.set(attrs);
+			Store.trigger("update", instance, this);
+			return instance;
+		},
+		find(id) {
+			const key = this._key(id);
+			if (key == null) return;
+			return this.instances[key];
+		},
+		has(id) {
+			return !!this.find(id);
+		},
+		patch(id, attrs, options) {
+			const instance = this.find(id);
+			if (!instance) return;
+			instance.set(attrs, options);
+			Store.trigger("update", instance, this);
+			return instance;
+		},
+		evict(id) {
+			return this._removeKey(this._key(id));
+		},
+		inspect(id) {
+			const key = this._key(id);
+			const model = key == null ? void 0 : this.instances[key];
+			return {
+				modelName: this.modelName,
+				id,
+				key,
+				cached: !!model,
+				model
+			};
+		},
+		reset() {
+			Object.keys(this.instances).forEach((key) => {
+				this._detachCached(this.instances[key]);
+			});
+			this.pending.slice().forEach((instance) => {
+				this._detachPending(instance);
+			});
+			this.instances = createCache();
+			this.pending = [];
+		},
+		_new(attrs, options) {
+			const instance = new this.Model(attrs, options);
+			if (instance.isNew()) this._trackPending(instance);
+			else this._add(instance);
+			return instance;
+		},
+		_add(instance) {
+			const key = this._getModelKey(instance);
+			this._detachPending(instance);
+			if (key == null) return;
+			if (this.instances[key]) return;
+			this.instances[key] = instance;
+			this._attachCached(instance);
+			Store.trigger("add", instance, this);
+		},
+		remove(instance) {
+			this._removeKey(this._getModelKey(instance), instance);
+			return instance;
+		},
+		_getKey(attrs) {
+			return attrs && this._key(attrs[this.Model.prototype.idAttribute]);
+		},
+		_getModelKey(instance) {
+			if (!instance) return;
+			return this._key(instance.id);
+		},
+		_key(id) {
+			if (id == null) return;
+			return String(id);
+		},
+		_trackPending(instance) {
+			this.pending.push(instance);
+			instance.once(`change:${instance.idAttribute}`, this._add, this);
+			instance.on("destroy", this._removePending, this);
+		},
+		_removePending(instance) {
+			this._detachPending(instance);
+		},
+		_detachPending(instance) {
+			const index = this.pending.indexOf(instance);
+			if (index > -1) this.pending.splice(index, 1);
+			instance.off(`change:${instance.idAttribute}`, this._add, this);
+			instance.off("destroy", this._removePending, this);
+		},
+		_attachCached(instance) {
+			instance.on("destroy", this.remove, this);
+		},
+		_detachCached(instance) {
+			instance.off("destroy", this.remove, this);
+		},
+		_removeKey(key, eventInstance) {
+			if (key == null) return;
+			const instance = this.instances[key];
+			if (!instance) return;
+			delete this.instances[key];
+			this._detachCached(instance);
+			Store.trigger("remove", eventInstance || instance, this);
+			return instance;
+		}
+	});
+	//#endregion
+	//#region lib/index.js
+	let ModelCaches = {};
+	const STORE_INSPECT_LABEL = "[Backbone.Store]";
+	const nodeInspectSymbol = typeof Symbol === "function" && Symbol.for && Symbol.for("nodejs.util.inspect.custom");
+	function isCustomInspectCall(modelName, id) {
+		return typeof modelName === "number" && (id == null || typeof id === "object");
+	}
+	/**
+	* Store wrapper converts regular Backbone models into unique ones.
+	*
+	* Example:
+	*   const StoredUser = Store(User);
+	*/
+	function Store(Model, modelName = (0, underscore.uniqueId)("Store_")) {
+		return Store.add(Model, modelName).ModelConstructor;
+	}
+	(0, underscore.extend)(Store, backbone.default.Events, {
+		ModelCache,
+		add(Model, modelName) {
+			if (!modelName) throw "Model name required";
+			if (ModelCaches[modelName]) return ModelCaches[modelName];
+			return ModelCaches[modelName] = new Store.ModelCache(Model, modelName);
+		},
+		getCache(modelName) {
+			if (!ModelCaches[modelName]) throw `Unrecognized Model: "${modelName}"`;
+			return ModelCaches[modelName];
+		},
+		getAllCache() {
+			return (0, underscore.clone)(ModelCaches);
+		},
+		get(modelName) {
+			return Store.getCache(modelName).ModelConstructor;
+		},
+		find(modelName, id) {
+			return Store.getCache(modelName).find(id);
+		},
+		has(modelName, id) {
+			return Store.getCache(modelName).has(id);
+		},
+		patch(modelName, id, attrs, options) {
+			return Store.getCache(modelName).patch(id, attrs, options);
+		},
+		evict(modelName, id) {
+			return Store.getCache(modelName).evict(id);
+		},
+		inspect(modelName, id) {
+			if (isCustomInspectCall(modelName, id)) return STORE_INSPECT_LABEL;
+			return Store.getCache(modelName).inspect(id);
+		},
+		getAll() {
+			return (0, underscore.reduce)(ModelCaches, (all, cache, modelName) => {
+				all[modelName] = cache.ModelConstructor;
+				return all;
+			}, {});
+		},
+		reset(modelName) {
+			Store.getCache(modelName).reset();
+		},
+		resetAll() {
+			(0, underscore.each)(ModelCaches, (cache) => {
+				cache.reset();
+			});
+		},
+		remove(modelName) {
+			if (!ModelCaches[modelName]) return;
+			ModelCaches[modelName].reset();
+			delete ModelCaches[modelName];
+		},
+		removeAll() {
+			Store.resetAll();
+			ModelCaches = {};
+		}
+	});
+	if (nodeInspectSymbol) Store[nodeInspectSymbol] = () => STORE_INSPECT_LABEL;
+	backbone.default.Store = Store;
+	//#endregion
+	exports.ModelCache = ModelCache;
+	exports.default = Store;
+});
 
-  function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-  var ___default = /*#__PURE__*/_interopDefaultLegacy(_);
-  var Backbone__default = /*#__PURE__*/_interopDefaultLegacy(Backbone);
-
-  /*
-   * Encapsulates a cache for a single model.
-   */
-
-  function ModelCache(Model, modelName) {
-    this.instances = {};
-    this.Model = Model;
-    this.modelName = modelName;
-    this.ModelConstructor = this._getConstructor(Model);
-  }
-
-  ___default['default'].extend(ModelCache.prototype, {
-    _getConstructor: function _getConstructor(Model) {
-      var cache = this;
-
-      var ModelConstructor = function ModelConstructor(attrs, options) {
-        return cache.get(attrs, options);
-      }; // Extend Model's static properties onto new
-
-
-      ___default['default'].extend(ModelConstructor, Model); // Backbone collections need prototype of wrapped class
-
-
-      ModelConstructor.prototype = this.Model.prototype;
-      return ModelConstructor;
-    },
-    get: function get(attrs, options) {
-      var instanceId = attrs && attrs[this.Model.prototype.idAttribute]; // Attempt to restore a locally cached instance
-
-      var instance = this.instances[instanceId];
-
-      if (!instance) {
-        // If we haven't seen this instance before, start caching it
-        return this._new(attrs, options);
-      } // Otherwise update the attributes of the cached instance
-
-
-      instance.set(attrs);
-      Store.trigger('update', instance, this);
-      return instance;
-    },
-    _new: function _new(attrs, options) {
-      var instance = new this.Model(attrs, options);
-
-      if (instance.isNew()) {
-        // Store the instance if we get an id after instantation
-        instance.once("change:".concat(instance.idAttribute), this._add, this);
-      } else {
-        this._add(instance);
-      }
-
-      instance.on('destroy', this.remove, this);
-      return instance;
-    },
-    _add: function _add(instance) {
-      // If the id is already stored do not add it.
-      if (this.instances[instance.id]) return;
-      this.instances[instance.id] = instance;
-      Store.trigger('add', instance, this);
-    },
-    remove: function remove(instance) {
-      if (!this.instances[instance.id]) return instance;
-      delete this.instances[instance.id];
-      Store.trigger('remove', instance, this);
-      return instance;
-    }
-  });
-
-  var ModelCaches = {};
-  /**
-   * Store wrapper converts regular Backbone models into unique ones.
-   *
-   * Example:
-   *   const StoredUser = Store(User);
-   */
-
-  function Store(Model) {
-    var modelName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ___default['default'].uniqueId('Store_');
-    var cache = Store.add(Model, modelName);
-    return cache.ModelConstructor;
-  } // Static functions
-
-
-  ___default['default'].extend(Store, Backbone__default['default'].Events, {
-    ModelCache: ModelCache,
-    add: function add(Model, modelName) {
-      if (!modelName) throw 'Model name required';
-      if (ModelCaches[modelName]) return ModelCaches[modelName];
-      return ModelCaches[modelName] = new Store.ModelCache(Model, modelName);
-    },
-    getCache: function getCache(modelName) {
-      if (!ModelCaches[modelName]) throw "Unrecognized Model: \"".concat(modelName, "\"");
-      return ModelCaches[modelName];
-    },
-    getAllCache: function getAllCache() {
-      return ___default['default'].clone(ModelCaches);
-    },
-    get: function get(modelName) {
-      return Store.getCache(modelName).ModelConstructor;
-    },
-    getAll: function getAll() {
-      return ___default['default'].reduce(ModelCaches, function (all, cache, modelName) {
-        all[modelName] = cache.ModelConstructor;
-        return all;
-      }, {});
-    },
-    remove: function remove(modelName) {
-      delete ModelCaches[modelName];
-    },
-    removeAll: function removeAll() {
-      ModelCaches = {};
-    }
-  });
-
-  Backbone__default['default'].Store = Store;
-
-  exports.ModelCache = ModelCache;
-  exports.default = Store;
-
-  Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
 //# sourceMappingURL=backbone.store.js.map

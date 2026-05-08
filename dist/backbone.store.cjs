@@ -1,5 +1,32 @@
-import { clone, each, extend, reduce, uniqueId } from "underscore";
-import Backbone from "backbone";
+Object.defineProperties(exports, {
+	__esModule: { value: true },
+	[Symbol.toStringTag]: { value: "Module" }
+});
+//#region \0rolldown/runtime.js
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __copyProps = (to, from, except, desc) => {
+	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
+		key = keys[i];
+		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
+			get: ((k) => from[k]).bind(null, key),
+			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+		});
+	}
+	return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
+	value: mod,
+	enumerable: true
+}) : target, mod));
+//#endregion
+let underscore = require("underscore");
+let backbone = require("backbone");
+backbone = __toESM(backbone, 1);
 //#region lib/model-cache.js
 function createCache() {
 	return Object.create(null);
@@ -11,13 +38,13 @@ function ModelCache(Model, modelName) {
 	this.modelName = modelName;
 	this.ModelConstructor = this._getConstructor(Model);
 }
-extend(ModelCache.prototype, {
+(0, underscore.extend)(ModelCache.prototype, {
 	_getConstructor(Model) {
 		const cache = this;
 		const ModelConstructor = function(attrs, options) {
 			return cache.get(attrs, options);
 		};
-		extend(ModelConstructor, Model);
+		(0, underscore.extend)(ModelConstructor, Model);
 		ModelConstructor.prototype = this.Model.prototype;
 		return ModelConstructor;
 	},
@@ -142,10 +169,10 @@ function isCustomInspectCall(modelName, id) {
 * Example:
 *   const StoredUser = Store(User);
 */
-function Store(Model, modelName = uniqueId("Store_")) {
+function Store(Model, modelName = (0, underscore.uniqueId)("Store_")) {
 	return Store.add(Model, modelName).ModelConstructor;
 }
-extend(Store, Backbone.Events, {
+(0, underscore.extend)(Store, backbone.default.Events, {
 	ModelCache,
 	add(Model, modelName) {
 		if (!modelName) throw "Model name required";
@@ -157,7 +184,7 @@ extend(Store, Backbone.Events, {
 		return ModelCaches[modelName];
 	},
 	getAllCache() {
-		return clone(ModelCaches);
+		return (0, underscore.clone)(ModelCaches);
 	},
 	get(modelName) {
 		return Store.getCache(modelName).ModelConstructor;
@@ -179,7 +206,7 @@ extend(Store, Backbone.Events, {
 		return Store.getCache(modelName).inspect(id);
 	},
 	getAll() {
-		return reduce(ModelCaches, (all, cache, modelName) => {
+		return (0, underscore.reduce)(ModelCaches, (all, cache, modelName) => {
 			all[modelName] = cache.ModelConstructor;
 			return all;
 		}, {});
@@ -188,7 +215,7 @@ extend(Store, Backbone.Events, {
 		Store.getCache(modelName).reset();
 	},
 	resetAll() {
-		each(ModelCaches, (cache) => {
+		(0, underscore.each)(ModelCaches, (cache) => {
 			cache.reset();
 		});
 	},
@@ -203,8 +230,9 @@ extend(Store, Backbone.Events, {
 	}
 });
 if (nodeInspectSymbol) Store[nodeInspectSymbol] = () => STORE_INSPECT_LABEL;
-Backbone.Store = Store;
+backbone.default.Store = Store;
 //#endregion
-export { ModelCache, Store as default };
+exports.ModelCache = ModelCache;
+exports.default = Store;
 
-//# sourceMappingURL=backbone.store.mjs.map
+//# sourceMappingURL=backbone.store.cjs.map
